@@ -16,4 +16,4 @@ This repo contains the following scripts:
 * **dataprep.py** is used to prepare the data for plotting.
 * **chartprep.py** is used to create the final html file with the charts.
 * **twitterbot.py** continously scans the collected data for high proposer payments and tweets about it.
-
+* **logger.py** creates logs for monitoring purpose.
