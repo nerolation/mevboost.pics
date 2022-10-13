@@ -92,8 +92,11 @@ def get_last_file(off=0):
                 nr = 0
             else:
                 nr = max(nr)
-            maxfilenr.append(nr)        
-    return LOCATION + "mevboost_" +  str(max(maxfilenr)+off) + ".csv"
+            maxfilenr.append(nr)  
+    if len(maxfilenr) > 0:
+        return LOCATION + "mevboost_" +  str(max(maxfilenr)+off) + ".csv"
+    else:
+        return LOCATION + "mevboost_0.csv"
 
 # Set endslot to last known slot of relay
 def set_end_slot(df, eps):
