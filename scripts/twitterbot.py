@@ -33,7 +33,7 @@ URL2 = "https://beaconcha.in/slot/{}"
 TWEET = "High Proposer Payment Alert! 💸 \nValidator received {:,.3f} ETH from builder @ {}.\n" \
             + "Slot: {:,.0f}.\nReceived through the {} relay.\n"+URL
 
-TWEET_2 = "High Proposer Payment Alert! 💸 \nValidator @ {} received {:,.3f} ETH from builder @ {}.\n" \
+TWEET_2 = "High Proposer Payment Alert! 💸 \nValidator {} received {:,.3f} ETH from builder {}.\n" \
             + "Slot: {:,.0f}.\nReceived through the {} relay.\n"+URL
 
 def get_last_file(off=0):
