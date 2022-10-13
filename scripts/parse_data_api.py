@@ -254,4 +254,3 @@ try:
 
 except KeyboardInterrupt:
     print("\nstopping application...")
-    break
