@@ -34,10 +34,11 @@ if not os.path.isdir(LOCATION):
 IGNORE_OLD_DF = vars(_args)["scratch"]
 
 # Parsing will start at the latest slot and then loop backwards
+START_SLOT = vars(_args)["slot"]
 if START_SLOT == "latest":
     START_SLOT = get_end_slot() -80 # 80 slots, more than 2 epoches
 else:
-    START_SLOT = int(vars(_args)["slot"])
+    START_SLOT = int(START_SLOT)
     
 # Slot of the Merge
 POS_SWITCH_SLOT = 4700013 
