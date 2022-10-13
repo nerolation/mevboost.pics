@@ -103,6 +103,8 @@ def get_last_file(off=0):
     if len(maxfilenr) > 0:
         return LOCATION + "mevboost_" +  str(max(maxfilenr)+off) + ".csv"
     else:
+        OLD_DF = pd.DataFrame(columns=c)
+        OLD_DF.to_csv(LOCATION + "mevboost_0.csv", index=None)
         return LOCATION + "mevboost_0.csv"
 
 # Set endslot to last known slot of relay
