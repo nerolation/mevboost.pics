@@ -142,9 +142,9 @@ else:
     if os.path.isfile(FILENAME):
         input("There exists already a file named mevboost.csv. Press any key to continue.\n" \
               + "Press Crtl+C to stop\n")
-    for i in os.listdir(LOCATION):
+    for file in os.listdir(LOCATION):
         if file.startswith("mevboost_") and file.endswith(".csv"):
-            os.remove(LOCATION + i)
+            os.remove(LOCATION + file)
     OLD_DF.to_csv(FILENAME, index=None)    
 
     
