@@ -10,12 +10,15 @@ from termcolor import colored
 from requests.exceptions import ConnectionError
 
 
+def get_end_slot():
+    return int((datetime.now().timestamp() - 1606824023) / 12)
+
 # Handle parameters
 parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=60))
 
 # Set True if starting from scratch
 parser.add_argument('-s', '--scratch', help="start from scratch - default: False",  action='store_true')
-parser.add_argument('-slot', '--slot', help="latest slot", default="4750000")
+parser.add_argument('-slot', '--slot', help="latest slot", default="latest")
 parser.add_argument('-l', '--location', help="Storage location", default="data/")
 _args = parser.parse_args()
 
@@ -25,14 +28,15 @@ startTS = datetime.now()
 # Location to store mevboost.csv files
 LOCATION = vars(_args)["location"]
 if not os.path.isdir(LOCATION):
-    os.mkdir(LOCATION)
-    
+    os.mkdir(LOCATION)  
 
 # Ignore and overwrite old dataframe and start from scratch (first time usage, always from scratch)
 IGNORE_OLD_DF = vars(_args)["scratch"]
 
 # Parsing will start at the latest slot and then loop backwards
 START_SLOT = int(vars(_args)["slot"])
+if START_SLOT == "latest":
+    START_SLOT = get_end_slot() -80 # 80 slots, more than 2 epoches
 
 # Slot of the Merge
 POS_SWITCH_SLOT = 4700013 
@@ -80,6 +84,7 @@ eps = [Endpoint(fb, "flashbots"),
        Endpoint(mf, "manifold"), 
        Endpoint(ed, "eden")
       ]
+
 
 # Returns the current file or with off=1 the next one
 def get_last_file(off=0):
@@ -132,8 +137,6 @@ if not IGNORE_OLD_DF:
                 s = OLD_DF.loc[ix, "slot"]
                 KNOWN_SLOTS.add(r + str(s))
     # Update loaded blocks
-    
-
     OLD_DF = None  
         
 # If starting from scratch -> empty df, else load ./mevboost.csv    
@@ -147,8 +150,7 @@ else:
             os.remove(LOCATION + file)
     OLD_DF.to_csv(FILENAME, index=None)    
 
-    
-        
+
 def get_with_cursor(ep, s, counter=0):
     res = None
     while res == None:
@@ -196,8 +198,7 @@ def query(eps):
             min_slot = set()
             
             if results == "fail":
-                print(colored(f"{ep.relay} limit set to 100", "red", attrs=["bold"]))
-                ep.LIMIT = 100
+                print(colored(f"{ep.relay} failed fetching", "red", attrs=["bold"]))
                 break
             
             for i, r in enumerate(results):
@@ -227,12 +228,8 @@ def query(eps):
                 # Keep track of known slots
                 min_slot.add(int(r["slot"]))
                 
-                if ep.LIMIT < 100:
-                    print(f"Block found for slot {r['slot']} with relay {ep.relay}")
+                #print(f"Block found for slot {r['slot']} with relay {ep.relay}")
                 
-            # LIMIT can only be smaller than 100 after the first round
-            if ep.LIMIT < 100:
-                break
             # If nothing found, decrease parse-window by LIMIT, 
             # else take min slot -1 and start there
             if len(min_slot) == 0 and ep.LIMIT == 100:
@@ -245,32 +242,16 @@ def query(eps):
 
 
 # Run
-while True:
-    try:
-        # Get timestamp at start of iteration
-        roundStartTS = datetime.now()
-        # Query relay data api
-        eps = query(eps)
-        # Measure the slots passed since the start of the app
-        slots_passed = round((datetime.now()-startTS).total_seconds()/12)
-        # When iteration takes too long there is the risk of missing slots
-        # Therefore set limit to 100 which activates endless looping until endslot
-        if (datetime.now()-roundStartTS).total_seconds() > 12*50:
-            for ep in eps:
-                ep.LIMIT = 100  
-                ep.endslot = ep.knownMaxSlot
-        else:
-             for ep in eps:
-                ep.endslot = ep.knownMaxSlot
-                ep.LIMIT = 50 # 50 just to be safe (known slots will be skipped anyway)
-            
-        # Set slotFrom to the current slot
-        for ep in eps:
-            ep.slotFrom = START_SLOT + slots_passed
+try:
+    # Get timestamp at start of iteration
+    roundStartTS = datetime.now()
+    # Query relay data api
+    eps = query(eps)
+    # Set slotFrom to the current slot
+    for ep in eps:
+        ep.slotFrom = get_end_slot() - 80
 
-        print("waiting for 9 seconds")
-        time.sleep(9)
 
-    except KeyboardInterrupt:
-        print("\nstopping application...")
-        break
+except KeyboardInterrupt:
+    print("\nstopping application...")
+    break
