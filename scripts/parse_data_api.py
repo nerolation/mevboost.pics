@@ -114,7 +114,7 @@ def set_end_slot(df, eps):
             
 # Current file to proceed
 FILENAME = get_last_file()
-
+LEN_CURRENT_FILE = 0
 KNOWN_SLOTS = set()
 KNOWN_SLOTS_int = set()
 if not IGNORE_OLD_DF:
