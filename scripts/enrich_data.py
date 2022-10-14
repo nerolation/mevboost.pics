@@ -51,7 +51,7 @@ def enrich_data(w3, df, df_txs, counter_txs):
         for ix, row in df.iterrows():
             print(f"           {ix}/{len(df)}", end="\r")
             # If miner is not NaN, then skip, NaN == float
-            if not type(df.loc[ix, "miner"]) == float or not df.loc[ix, "miner"]==df.loc[ix, "miner"]:
+            if not type(df.loc[ix, "miner"]) == float or df.loc[ix, "miner"]==df.loc[ix, "miner"]:
                 print(f"skipped", end="\r")
                 continue
             try:
