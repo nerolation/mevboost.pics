@@ -179,7 +179,6 @@ def query(eps):
     global slots_parsed, LEN_CURRENT_FILE, FILENAME
     # Loop over all endpoints
     for ep in eps:
-        
         print(f"parsing {ep.relay}")
         # Loop from ep.slotFrom to endslot, endslot is always lower than the slotFrom
         while ep.slotFrom > ep.endslot:
@@ -245,10 +244,6 @@ try:
     roundStartTS = datetime.now()
     # Query relay data api
     eps = query(eps)
-    # Set slotFrom to the current slot
-    for ep in eps:
-        ep.slotFrom = get_end_slot() - 80
-
 
 except KeyboardInterrupt:
     print("\nstopping application...")
