@@ -98,6 +98,7 @@ if __name__ == "__main__":
 
     df2 = NEW_DF
     df = pd.concat([df,df2[~df2["slot"].isin(df["slot"])]], ignore_index=True)
+    df = df.sort_values("slot")
     df_txs = pd.DataFrame(columns=["miner", "block_number", "txhash"])
     enrich_data(w3, df, df_txs, counter_txs)
     log("enriching data successful")
