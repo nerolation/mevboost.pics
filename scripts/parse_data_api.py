@@ -125,7 +125,6 @@ def set_end_slot(df, eps):
 FILENAME = get_last_file()
 LEN_CURRENT_FILE = 0
 KNOWN_SLOTS = set()
-KNOWN_SLOTS_int = set()
 if not IGNORE_OLD_DF:
     for file in sorted(os.listdir(LOCATION)):
         if file.startswith("mevboost_") and file.endswith(".csv"):
@@ -189,15 +188,9 @@ def query(eps):
                     LEN_CURRENT_FILE = 0
                     pd.DataFrame(columns=c).to_csv(FILENAME, index=None)    
                     print(f"Start writing into new file: {FILENAME}")
-            results = None
-            while results == None:
-                results = get_with_cursor(ep, ep.slotFrom)
+
+            results = get_with_cursor(ep, ep.slotFrom)
             min_slot = set()
-            
-            if results == "fail":
-                print(colored(f"{ep.relay} failed fetching", "red", attrs=["bold"]))
-                break
-            
             for i, r in enumerate(results):
                 if str(ep.relay+r["slot"]) in KNOWN_SLOTS:
                     continue
@@ -218,7 +211,6 @@ def query(eps):
                     f.write(content)
                 
                 KNOWN_SLOTS.add(str(ep.relay+r["slot"]))
-                KNOWN_SLOTS_int.add(int(r["slot"]))
                 # Keep track of max known slot per ep
                 ep.knownMaxSlot = max([ep.knownMaxSlot, int(r["slot"])])
                 slots_parsed += 1
