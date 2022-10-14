@@ -185,17 +185,16 @@ def query(eps):
     # Loop over all endpoints
     for ep in eps:
         
-        # If more than 10k entries -> new file
-        if LEN_CURRENT_FILE + slots_parsed > 10000:
-            FILENAME = get_last_file(off=1)
-            slots_parsed = 0
-            LEN_CURRENT_FILE = 0
-            pd.DataFrame(columns=c).to_csv(FILENAME, index=None)    
-            print(f"Start writing into new file: {FILENAME}")
-        
         print(f"parsing {ep.relay}")
         # Loop from ep.slotFrom to endslot, endslot is always lower than the slotFrom
         while ep.slotFrom > ep.endslot:
+             # If more than 10k entries -> new file
+            if LEN_CURRENT_FILE + slots_parsed > 10000:
+                    FILENAME = get_last_file(off=1)
+                    slots_parsed = 0
+                    LEN_CURRENT_FILE = 0
+                    pd.DataFrame(columns=c).to_csv(FILENAME, index=None)    
+                    print(f"Start writing into new file: {FILENAME}")
             results = None
             while results == None:
                 results = get_with_cursor(ep, ep.slotFrom)
