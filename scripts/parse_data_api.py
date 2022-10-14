@@ -160,21 +160,16 @@ def get_with_cursor(ep, s, counter=0):
     while res == None:
         try:
             res = requests.get(ep.endpoint.format(ep.LIMIT,s), timeout=20)
+            if not res.status_code == 200:
+                raise
         except Exception as e:
-            time.sleep(2)
+            time.sleep(counter)
             print(f"something failed: ({counter+1}/3) " + str(e))
             counter += 1
-            if counter >= 3:
-                print(colored(f"{ep.relay} failed", "red", attrs=["bold"]))
-                print(ep.endpoint.format(ep.LIMIT,s))
-                res = "fail"
-            else:
-                res = None
+            print(colored(f"{ep.relay} failed", "red", attrs=["bold"]))
+            print(ep.endpoint.format(ep.LIMIT,s))
+            res = None
     time.sleep(0.8)
-    if res == "fail":
-        return res
-    if not res.status_code == 200:
-        return None
     print(colored(ep.endpoint.format(ep.LIMIT,s), "green"))
     return eval(res.content.decode("utf-8"))
 
