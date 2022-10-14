@@ -236,7 +236,7 @@ def query(eps):
                 
             # If nothing found, decrease parse-window by LIMIT, 
             # else take min slot -1 and start there
-            if len(min_slot) == 0 and ep.LIMIT == 100:
+            if len(min_slot) == 0:
                 ep.slotFrom -= ep.LIMIT
             else:
                 min_slot = min(min_slot)
