@@ -93,7 +93,6 @@ if __name__ == "__main__":
     assert w3.isConnected()
     try:
         df = pd.read_csv(FOLDER + "mevboost_e.csv", dtype={"miner":str, "value":float})
-        df = df.fillna("none")
     except:
         df = pd.DataFrame(columns=["relay", "slot", "block_hash", "builder_pubkey", "value", "gas_used", "gas_limit"])
 
@@ -101,5 +100,6 @@ if __name__ == "__main__":
     df = pd.concat([df,df2[~df2["slot"].isin(df["slot"])]], ignore_index=True)
     df = df.sort_values("slot")
     df_txs = pd.DataFrame(columns=["miner", "block_number", "txhash"])
+    df = df.fillna("none")
     enrich_data(w3, df, df_txs, counter_txs)
     log("enriching data successful")
