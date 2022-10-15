@@ -119,7 +119,7 @@ def set_end_slot(df, eps):
             continue
         max_slot_ep = max(entries_per_ep)
         if max_slot_ep > ep.endslot and not FULL:
-            ep.endslot = max_slot_ep
+            ep.endslot = max_slot_ep - 101 # One "tranche" more to anticipate bugs
         print(f"{colored(ep.relay, 'green', attrs=['bold'])} last slot set to {ep.endslot}")
         
             
