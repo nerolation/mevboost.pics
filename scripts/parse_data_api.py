@@ -220,7 +220,8 @@ def query(eps):
                 # Keep track of known slots
                 min_slot.add(int(r["slot"]))
                 
-                #print(f"Block found for slot {r['slot']} with relay {ep.relay}")
+                if FULL:
+                    print(f"Block found for slot {r['slot']} with relay {ep.relay}")
                 
             # If nothing found, decrease parse-window by LIMIT, 
             # else take min slot -1 and start there
