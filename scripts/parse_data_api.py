@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpForma
 
 # Set True if starting from scratch
 parser.add_argument('-s', '--scratch', help="start from scratch - default: False",  action='store_true')
+parser.add_argument('-full', '--full', help="full scan - default: False",  action='store_true')
 parser.add_argument('-slot', '--slot', help="latest slot", default="latest")
 parser.add_argument('-l', '--location', help="Storage location", default="data/")
 _args = parser.parse_args()
@@ -32,6 +33,9 @@ if not os.path.isdir(LOCATION):
 
 # Ignore and overwrite old dataframe and start from scratch (first time usage, always from scratch)
 IGNORE_OLD_DF = vars(_args)["scratch"]
+
+# Verify all existing entries in data base - needed because of all the buggy relays
+FULL = vars(_args)["full"]
 
 # Parsing will start at the latest slot and then loop backwards
 START_SLOT = vars(_args)["slot"]
@@ -75,7 +79,6 @@ class Endpoint():
         self.relay = relay
         self.slotFrom = START_SLOT
         self.LIMIT = LIMIT
-        self.knownMaxSlot = POS_SWITCH_SLOT
         self.endslot = POS_SWITCH_SLOT
         
 eps = [Endpoint(fb, "flashbots"), 
@@ -115,9 +118,8 @@ def set_end_slot(df, eps):
         if len(entries_per_ep) == 0:
             continue
         max_slot_ep = max(entries_per_ep)
-        if max_slot_ep > ep.endslot:
+        if max_slot_ep > ep.endslot and not FULL:
             ep.endslot = max_slot_ep
-            ep.knownMaxSlot = max_slot_ep
         print(f"{colored(ep.relay, 'green', attrs=['bold'])} last slot set to {ep.endslot}")
         
             
@@ -139,8 +141,10 @@ if not IGNORE_OLD_DF:
                 r = OLD_DF.loc[ix, "relay"]
                 s = OLD_DF.loc[ix, "slot"]
                 KNOWN_SLOTS.add(r + str(s))
+               
     # Update loaded blocks
     OLD_DF = None  
+    print("Total of {:,.0f} slots already parsed".format(len(KNOWN_SLOTS)))
         
 # If starting from scratch -> empty df, else load ./mevboost.csv    
 else:
@@ -212,7 +216,6 @@ def query(eps):
                 
                 KNOWN_SLOTS.add(str(ep.relay+r["slot"]))
                 # Keep track of max known slot per ep
-                ep.knownMaxSlot = max([ep.knownMaxSlot, int(r["slot"])])
                 slots_parsed += 1
                 # Keep track of known slots
                 min_slot.add(int(r["slot"]))
