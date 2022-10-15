@@ -83,6 +83,7 @@ def enrich_data(w3, df, df_txs, counter_txs):
         log("enriching data FAILED")
     
     finally:
+        print("Storing successful")
         df.to_csv(FOLDER + "mevboost_e.csv", index=None)
         df_txs.to_csv(FOLDER + f"mevboost_e_txs_{counter_txs}.csv", index=None)
         
