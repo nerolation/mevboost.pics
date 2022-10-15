@@ -51,7 +51,7 @@ def enrich_data(w3, df, df_txs, counter_txs):
         for ix, row in df.iterrows():
             print(f"           {ix}/{len(df)}", end="\r")
             # If miner is not NaN, then skip, NaN == float
-            if df.loc[ix, "miner"]==df.loc[ix, "miner"]:
+            if not df.loc[ix, "miner"] == "none":
                 print(f"skipped", end="\r")
                 continue
             try:
@@ -92,7 +92,8 @@ if __name__ == "__main__":
     w3 = Web3(Web3.HTTPProvider(RPC_ENDPOINT))
     assert w3.isConnected()
     try:
-        df = pd.read_csv(FOLDER + "mevboost_e.csv")
+        df = pd.read_csv(FOLDER + "mevboost_e.csv", dtype={"miner":str, "value":float})
+        df = df.fillna("none")
     except:
         df = pd.DataFrame(columns=["relay", "slot", "block_hash", "builder_pubkey", "value", "gas_used", "gas_limit"])
 
