@@ -23,6 +23,22 @@ def open_file(FOLDER):
     df["slot"] = df["slot"].apply(lambda x: int(x))
     return df
 
+# Open mevboost_e*.csv files and concat
+def open_enriched_file(FOLDER):
+    FILENR = 0
+    df = pd.DataFrame()
+    for file in os.listdir(FOLDER):
+        if not (file.startswith("mevboost_e") and file.endswith(".csv")):
+            continue
+        if "txs" om file:
+            continue
+        FILENR = max([FILENR, int(re.findall("[0-9]+", file)[0])])
+        _df = pd.read_csv(FOLDER + file, dtype={"miner":str, "value":float})
+        df = pd.concat([df, _df])
+    df["value"] = df["value"].apply(lambda x: int(x))
+    df["slot"] = df["slot"].apply(lambda x: int(x))
+    return df, FILENR + 1
+
 NEW_DF = open_file(DATASET)
 
 if not os.path.isdir(FOLDER):
@@ -51,6 +67,12 @@ def enrich_data(w3, df, df_txs, counter_txs):
         for ix, row in df.iterrows():
             print(f"           {ix}/{len(df)}", end="\r")
             # If miner is not NaN, then skip, NaN == float
+            while len(df) > 10000:
+                _df = df.iloc[0:10000]
+                df = df[~df["slot"].isin(_df["slot"])]
+                _df.to_csv(FOLDER + "mevboost_e_{}.csv".format(FILENR), index=None)
+                FILENR += 1
+            
             if not df.loc[ix, "miner"] == "none":
                 print(f"skipped", end="\r")
                 continue
@@ -83,9 +105,9 @@ def enrich_data(w3, df, df_txs, counter_txs):
         log("enriching data FAILED")
     
     finally:
-        print("Storing successful")
         df.to_csv(FOLDER + "mevboost_e.csv", index=None)
         df_txs.to_csv(FOLDER + f"mevboost_e_txs_{counter_txs}.csv", index=None)
+        print("Storing successful")
         
 
 
@@ -93,7 +115,7 @@ if __name__ == "__main__":
     w3 = Web3(Web3.HTTPProvider(RPC_ENDPOINT))
     assert w3.isConnected()
     try:
-        df = pd.read_csv(FOLDER + "mevboost_e.csv", dtype={"miner":str, "value":float})
+        df, FILENR = open_enriched_file(FOLDER)
     except:
         df = pd.DataFrame(columns=["relay", "slot", "block_hash", "builder_pubkey", "value", "gas_used", "gas_limit"])
 
