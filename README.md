@@ -10,8 +10,8 @@
 
 
 This repo contains the following scripts:
-* **parse_data_api.py** is used to collect data (the [mev-boost relays](https://flashbots.notion.site/Relay-API-Spec-5fb0819366954962bc02e81cb33840f5) is used to collect the data).
-* **enrich_data.py** is used to add additional information (block_nr, fee_recipient and transaction data) to the parsed data.
+* **parse_data_api.py** is used to collect data (the [mev-boost relays](https://flashbots.notion.site/Relay-API-Spec-5fb0819366954962bc02e81cb33840f5) is used to collect the data). **deprecated- find updated version at [eth-tornado-warning](https://github.com/Nerolation/eth-tornado-warning).**
+* **enrich_data.py** is used to add additional information (block_nr, fee_recipient and transaction data) to the parsed data. **deprecated- find updated version at [eth-tornado-warning](https://github.com/Nerolation/eth-tornado-warning).**
 * **add_block_rewards.py** is used to add the reward/block to the data set.
 * **dataprep.py** is used to prepare the data for plotting.
 * **chartprep.py** is used to create the final html file with the charts.
