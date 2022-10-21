@@ -25,19 +25,16 @@ def open_file(FOLDER):
 
 # Open mevboost_e*.csv files and concat
 def open_enriched_file(FOLDER):
-    FILENR = 0
     df = pd.DataFrame()
     for file in os.listdir(FOLDER):
-        if not (file.startswith("mevboost_e") and file.endswith(".csv")):
+        if file != "mevboost_e.csv":
             continue
-        if "txs" om file:
-            continue
-        FILENR = max([FILENR, int(re.findall("[0-9]+", file)[0])])
+        print("File found")
         _df = pd.read_csv(FOLDER + file, dtype={"miner":str, "value":float})
         df = pd.concat([df, _df])
     df["value"] = df["value"].apply(lambda x: int(x))
     df["slot"] = df["slot"].apply(lambda x: int(x))
-    return df, FILENR + 1
+    return df
 
 NEW_DF = open_file(DATASET)
 
@@ -50,7 +47,8 @@ for i in os.listdir(FOLDER):
         counter_txs += 1
 
 
-def enrich_data(w3, df, df_txs, counter_txs):
+def enrich_data(w3, df, df_txs):
+    global counter_txs
     #
     # Adds block hashes, miner address info about
     # transactions to new file named mevboost_e.csv
@@ -64,18 +62,20 @@ def enrich_data(w3, df, df_txs, counter_txs):
             df["tx_count"] = None
             
         # Loop over all rows
+        counter = 0
+        
+        nonnones = df[df["block_number"] != "none"].reset_index(drop=True)
+        df = df[df["block_number"] == "none"].reset_index(drop=True)
+        lnones = len(df)
+        
         for ix, row in df.iterrows():
-            print(f"           {ix}/{len(df)}", end="\r")
+            print(f"           {counter+1}/{lnones}", end="\r")
             # If miner is not NaN, then skip, NaN == float
-            while len(df) > 10000:
-                _df = df.iloc[0:10000]
-                df = df[~df["slot"].isin(_df["slot"])]
-                _df.to_csv(FOLDER + "mevboost_e_{}.csv".format(FILENR), index=None)
-                FILENR += 1
             
             if not df.loc[ix, "miner"] == "none":
                 print(f"skipped", end="\r")
                 continue
+            counter += 1
             try:
                 block = w3.eth.get_block(row["block_hash"])
             except BlockNotFound:
@@ -89,14 +89,17 @@ def enrich_data(w3, df, df_txs, counter_txs):
             l = len(df_txs)
             for ixx, tx in enumerate(txs):
                 df_txs.loc[l+ixx, ("miner", "block_number","txhash")] = builder, block_number, tx
-            if str(df.loc[ix, "gas_used"]) == "NaN" or df.loc[ix, "gas_used"] != df.loc[ix, "gas_used"]:
+            if str(df.loc[ix, "gas_used"]) == "none":
                 df.loc[ix, ("gas_used", "gas_limit")] =  block["gasUsed"], block["gasLimit"]
             
             # Store file with transations in chunks
             if len(df_txs) >= 10000:
+                print(f"Storing transactions, file nr: {counter_txs}")
                 df_txs.to_csv(FOLDER + f"mevboost_e_txs_{counter_txs}.csv", index=None)
                 df_txs = pd.DataFrame(columns=["miner", "block_number","txhash"])
                 counter_txs += 1
+         
+        
 
     except Exception as e:
         print("\n"+str(e))
@@ -105,9 +108,12 @@ def enrich_data(w3, df, df_txs, counter_txs):
         log("enriching data FAILED")
     
     finally:
+        df = pd.concat([nonnones, df], ignore_index=True)
+        df = df[df["miner"] != "none"]
         df.to_csv(FOLDER + "mevboost_e.csv", index=None)
         df_txs.to_csv(FOLDER + f"mevboost_e_txs_{counter_txs}.csv", index=None)
-        print("Storing successful")
+        counter_txs += 1
+        print(f"\nStoring successful")
         
 
 
@@ -115,14 +121,17 @@ if __name__ == "__main__":
     w3 = Web3(Web3.HTTPProvider(RPC_ENDPOINT))
     assert w3.isConnected()
     try:
-        df, FILENR = open_enriched_file(FOLDER)
+        df = open_enriched_file(FOLDER)
     except:
-        df = pd.DataFrame(columns=["relay", "slot", "block_hash", "builder_pubkey", "value", "gas_used", "gas_limit"])
+        df = pd.DataFrame(columns=["relay", "slot", "block_hash", "builder_pubkey", 
+                                   "value", "gas_used", "gas_limit", "miner", 
+                                   "block_number", "tx_count"])
+        print("No file found, starting new one")
 
     df2 = NEW_DF
     df = pd.concat([df,df2[~df2["slot"].isin(df["slot"])]], ignore_index=True)
-    df = df.sort_values("slot")
+    df = df.sort_values("slot").fillna("none")
     df_txs = pd.DataFrame(columns=["miner", "block_number", "txhash"])
-    df = df.fillna("none")
-    enrich_data(w3, df, df_txs, counter_txs)
+    enrich_data(w3, df, df_txs)
+        
     log("enriching data successful")

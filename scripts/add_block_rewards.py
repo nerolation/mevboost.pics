@@ -38,29 +38,32 @@ def get_block_reward(blocknr):
     
     
 try:
-    df = pd.read_csv(FOLDER + "mevboost_er.csv")
+    df = pd.read_csv(FOLDER + "mevboost_er.csv", dtype={"miner":str, "value":float, "slot":int})
     print("mevboost_er.csv loaded")
 except:
     df = pd.DataFrame(columns=["slot"])
 
 # Concat existing file with new entries
-df2 = pd.read_csv(FOLDER + "mevboost_e.csv")
+df2 = pd.read_csv(FOLDER + "mevboost_e.csv", dtype={"miner":str, "value":float, "slot":int})
 df = pd.concat([df,df2[~df2["slot"].isin(df["slot"])]], ignore_index=True)
 df = df[~df["block_number"].isna()]
 
 if "reward" not in df.columns:
     df["reward"] = None
 max_block = str(int(max(df.sort_values("block_number")["block_number"])))
-df = df.sort_values("block_number")
+df = df.sort_values("block_number").fillna("none")
+
+nonnones = df[df["reward"] != "none"].reset_index(drop=True)
+df = df[df["reward"] == "none"].reset_index(drop=True)
+l = len(df)
 try:
     for ix, i in df.iterrows():
-        print(str(int(i["block_number"])) +"/"+max_block, end="\r")
-        if df.loc[ix, "reward"] == df.loc[ix, "reward"]:
-            continue
+        print(str(ix) +"/"+ str(l), end="\r")
         # Add reward
         df.loc[ix, "reward"] = get_block_reward(int(i["block_number"]))
     log("adding block rewards successful")
 except:
     log("enriching data FAILED")
-finally:
-    df.to_csv(FOLDER + "mevboost_er.csv", index=None)
+    
+df = pd.concat([nonnones, df], ignore_index=True)
+df.to_csv(FOLDER + "mevboost_er.csv", index=None)

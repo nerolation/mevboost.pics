@@ -81,7 +81,8 @@ class Endpoint():
         self.LIMIT = LIMIT
         self.endslot = POS_SWITCH_SLOT
         
-eps = [Endpoint(fb, "flashbots"), 
+eps = [
+       Endpoint(fb, "flashbots"), 
        Endpoint(bn, "blocknative"),
        Endpoint(et, "bloxroute (ethical)"), 
        Endpoint(mp, "bloxroute (max profit)"),
@@ -171,6 +172,8 @@ def get_with_cursor(ep, s, counter=0):
             counter += 1
             print(colored(f"{ep.relay} failed", "red", attrs=["bold"]))
             print(ep.endpoint.format(ep.LIMIT,s))
+            if counter > 3:
+                return None
             res = None
     time.sleep(0.8)
     print(colored(ep.endpoint.format(ep.LIMIT,s), "green"))
@@ -194,6 +197,8 @@ def query(eps):
                     print(f"Start writing into new file: {FILENAME}")
 
             results = get_with_cursor(ep, ep.slotFrom)
+            if results == None:
+                break
             min_slot = set()
             for i, r in enumerate(results):
                 if str(ep.relay+r["slot"]) in KNOWN_SLOTS:
