@@ -10,7 +10,7 @@
 
 
 This repo contains the following scripts:
-(All of the files where created in the first days/weeks of mevboost and are out-dated by now. Updated versions will be uploaded in this repo soon. This time with clean code, obeying existing style guides,ect.)
+(All of the files where created in the first days/weeks of mevboost. Updated versions will be uploaded in this repo soon. This time with clean code, obeying existing style guides,ect.)
 
 * **parse_data_api.py** is used to collect data (the [mev-boost relays](https://flashbots.notion.site/Relay-API-Spec-5fb0819366954962bc02e81cb33840f5) is used to collect the data).
 * **enrich_data.py** is used to add additional information (block_nr, fee_recipient and transaction data) to the parsed data.
