@@ -69,8 +69,12 @@ et = "https://bloxroute.ethical.blxrbdn.com" + path
 mp = "https://bloxroute.max-profit.blxrbdn.com" + path
 mr = "https://bloxroute.regulated.blxrbdn.com" + path
 mf = "https://mainnet-relay.securerpc.com" + path
-ed = "https://relay.edennetwork.io/" + path
+ed = "https://relay.edennetwork.io" + path
 bn = "https://builder-relay-mainnet.blocknative.com" + path
+rl = "https://relayooor.wtf" + path
+ul = "https://relay.ultrasound.money" + path
+ag = "https://agnostic-relay.net" + path
+ae = "https://aestus.live" + path
 
 # Endpoint class
 class Endpoint():
@@ -82,14 +86,18 @@ class Endpoint():
         self.endslot = POS_SWITCH_SLOT
         
 eps = [
-       Endpoint(fb, "flashbots"), 
-       Endpoint(bn, "blocknative"),
-       Endpoint(et, "bloxroute (ethical)"), 
-       Endpoint(mp, "bloxroute (max profit)"),
-       Endpoint(mr, "bloxroute (regulated)"), 
-       Endpoint(mf, "manifold"), 
-       Endpoint(ed, "eden")
-      ]
+    Endpoint(fb, "flashbots"), 
+    Endpoint(bn, "blocknative"),
+    Endpoint(et, "bloxroute (ethical)"), 
+    Endpoint(mp, "bloxroute (max profit)"),
+    Endpoint(mr, "bloxroute (regulated)"), 
+    Endpoint(mf, "manifold"), 
+    Endpoint(ed, "eden"),
+    Endpoint(rl, "relayooor"),
+    Endpoint(ul, "ultrasound"),
+    Endpoint(ag, "agnostic Gnosis"),
+    Endpoint(ae, "aestus")
+]
 
 
 # Returns the current file or with off=1 the next one
